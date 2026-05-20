@@ -762,7 +762,7 @@
       <div class="section-body">
         <div class="notice" style="margin-bottom:0">
           <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2zm0 9v2m0 4h.01" stroke="#f9c74f" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-          <span>Upload your training brochure/registration info. If requesting mileage reimbursement or you've already paid any portion, also include your reimbursement form and/or receipts.</span>
+          <span>Upload your training brochure/registration info here to remind yourself what to attach. <strong>Attach these same files to the email</strong> before hitting Send — they cannot be sent automatically.</span>
         </div>
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
           <div class="upload-icon">
@@ -787,8 +787,8 @@
     <div class="success-circle">
       <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="#059669" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <h2>Request submitted!</h2>
-    <p>Your training request has been received. You'll get a confirmation email shortly, and your training chief will follow up with an approval decision.</p>
+    <h2>Almost done!</h2>
+    <p>Your email app should have opened with the request pre-filled. Just hit <strong>Send</strong> — and don't forget to attach your training brochure and any receipts before sending.</p>
     <button class="new-request-btn" onclick="resetForm()">Submit another request</button>
   </div>
 </main>
@@ -919,77 +919,87 @@
 
   function val(id) { return document.getElementById(id)?.value?.trim() || 'N/A'; }
 
-  async function submitForm() {
+  function submitForm() {
     if (!validate()) {
       document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Submitting...';
 
-    let fileData = [];
-    try {
-      fileData = await Promise.all(uploadedFiles.map(file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ name: file.name, type: file.type, size: file.size, data: reader.result.split(',')[1] });
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      })));
-    } catch (e) {
-      alert('Error reading files. Please try again.');
-      btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg> Submit request';
-      return;
-    }
+    // Replace with the mailbox your Power Automate flow watches
+    const TO_ADDRESS = 'FDPowerAutomate@cityofwestminster.us';
 
-    const payload = {
-      dateSubmitted: document.getElementById('dateSubmitted').value,
-      name: document.getElementById('name').value,
-      rankTitle: document.getElementById('rankTitle').value,
-      shift: getRadio('shift'),
-      email: document.getElementById('email').value,
-      className: document.getElementById('className').value,
-      vendorName: document.getElementById('vendorName').value,
-      classAddress: document.getElementById('classAddress').value,
-      classLocation: getRadio('classLocation'),
-      classStartDate: document.getElementById('classStartDate').value,
-      travelToDate: document.getElementById('travelToDate').value,
-      classEndDate: document.getElementById('classEndDate').value,
-      returnDate: document.getElementById('returnDate').value,
-      justification: document.getElementById('justification').value,
-      overtime: getRadio('overtime'),
-      registration: getRadio('registration') || 'Not specified',
-      registrationFee: val('registrationFee'),
-      transportation: getRadio('transportation'),
-      transportationCost: document.getElementById('transportCost').value,
-      parkingCost: val('parkingCost'),
-      mileageAmount: val('mileageAmount'),
-      airfareCost: val('airfareCost'),
-      airline: val('airline'),
-      lodgingCost: val('lodgingCost'),
-      lodgingAddress: val('lodgingAddress'),
-      mealCost: val('mealCost'),
-      otherCosts: val('otherCosts'),
-      attachments: fileData
-    };
+    const name        = document.getElementById('name').value;
+    const className   = document.getElementById('className').value;
+    const subject     = `Training Request — ${name} — ${className}`;
 
-    try {
-      const POWER_AUTOMATE_URL = 'YOUR_POWER_AUTOMATE_HTTP_TRIGGER_URL_HERE';
-      const response = await fetch(POWER_AUTOMATE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) throw new Error('Server error');
+    const fileNames = uploadedFiles.length
+      ? uploadedFiles.map(f => f.name).join(', ')
+      : 'None attached — please send separately';
+
+    const body = [
+      'WESTMINSTER FIRE DEPARTMENT',
+      'Training & Travel Expense Authorization Request',
+      '='.repeat(50),
+      '',
+      'REQUESTOR INFORMATION',
+      `Date Submitted:    ${document.getElementById('dateSubmitted').value}`,
+      `Name:              ${document.getElementById('name').value}`,
+      `Rank / Title:      ${document.getElementById('rankTitle').value}`,
+      `Shift:             ${getRadio('shift')}`,
+      `Email:             ${document.getElementById('email').value}`,
+      '',
+      'CLASS DETAILS',
+      `Class Name:        ${document.getElementById('className').value}`,
+      `Vendor:            ${document.getElementById('vendorName').value}`,
+      `Class Address:     ${document.getElementById('classAddress').value}`,
+      `Location:          ${getRadio('classLocation')}`,
+      `Class Start Date:  ${document.getElementById('classStartDate').value}`,
+      `Travel To Date:    ${document.getElementById('travelToDate').value}`,
+      `Class End Date:    ${document.getElementById('classEndDate').value}`,
+      `Return Date:       ${document.getElementById('returnDate').value}`,
+      '',
+      'JUSTIFICATION & OVERTIME',
+      `Justification:`,
+      document.getElementById('justification').value,
+      '',
+      `Overtime:          ${getRadio('overtime')}`,
+      '',
+      'REGISTRATION',
+      `Status:            ${getRadio('registration') || 'Not specified'}`,
+      `Fee:               ${val('registrationFee')}`,
+      '',
+      'TRANSPORTATION',
+      `Type:              ${getRadio('transportation')}`,
+      `Cost:              ${document.getElementById('transportCost').value}`,
+      `Parking Cost:      ${val('parkingCost')}`,
+      `Mileage Amount:    ${val('mileageAmount')}`,
+      '',
+      'AIRFARE & LODGING',
+      `Airfare Cost:      ${val('airfareCost')}`,
+      `Airline:           ${val('airline')}`,
+      `Lodging Cost:      ${val('lodgingCost')}`,
+      `Lodging Address:   ${val('lodgingAddress')}`,
+      '',
+      'MEALS & OTHER',
+      `Meal Cost:         ${val('mealCost')}`,
+      `Other Costs:       ${val('otherCosts')}`,
+      '',
+      'ATTACHMENTS',
+      fileNames,
+      '',
+      '='.repeat(50),
+      'Submitted via WFD Training Request App',
+    ].join('\n');
+
+    const mailto = `mailto:${TO_ADDRESS}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+
+    // Show success screen after a short delay to let the mail app open
+    setTimeout(() => {
       document.getElementById('form-body').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      alert('Submission failed. Please check your connection and try again.');
-      btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg> Submit request';
-    }
+    }, 1000);
   }
 
   function resetForm() {
