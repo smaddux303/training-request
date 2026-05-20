@@ -363,6 +363,99 @@
 
     .hidden { display: none !important; }
 
+    .install-banner {
+      background: var(--brand);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .install-banner.visible { display: block; }
+
+    .install-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .install-banner-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .install-banner-title svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.85); flex-shrink: 0; }
+
+    .install-dismiss {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      padding: 2px;
+      font-size: 18px;
+      line-height: 1;
+      font-family: var(--font);
+    }
+
+    .install-dismiss:hover { color: #fff; }
+
+    .install-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .install-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.4;
+    }
+
+    .install-step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .install-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: #fff;
+      color: var(--brand);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+
+    .install-btn:hover { background: #f0f4fa; }
+
+    .install-icon-inline {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      vertical-align: -3px;
+    }
+
     @media (min-width: 600px) {
       header { padding: 18px 24px 22px; }
       main { padding: 20px 24px 48px; }
@@ -393,6 +486,34 @@
 
 <main>
   <div id="form-body">
+
+    <!-- Install banner: shown by JS based on platform, hidden once installed -->
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-header">
+        <div class="install-banner-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2C9.5 6 7 8 7 12a5 5 0 0010 0c0-4-2.5-6-5-10zm0 14.5a2.5 2.5 0 010-5c1 0 2.5 1 2.5 2.5S13 16.5 12 16.5z"/></svg>
+          Add this form to your home screen
+        </div>
+        <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">×</button>
+      </div>
+      <div id="install-steps-ios" class="install-steps" style="display:none">
+        <div class="install-step"><div class="install-step-num">1</div><span>Tap the <strong>Share</strong> button <svg class="install-icon-inline" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round"><path d="M8 12H3v9h18v-9h-5M12 3v12M9 6l3-3 3 3"/></svg> at the bottom of Safari</span></div>
+        <div class="install-step"><div class="install-step-num">2</div><span>Scroll down and tap <strong>Add to Home Screen</strong></span></div>
+        <div class="install-step"><div class="install-step-num">3</div><span>Tap <strong>Add</strong> — a WFD icon will appear on your home screen</span></div>
+      </div>
+      <div id="install-steps-android" class="install-steps" style="display:none">
+        <div class="install-step"><div class="install-step-num">1</div><span>Tap the <strong>menu</strong> (⋮) in the top-right corner of Chrome</span></div>
+        <div class="install-step"><div class="install-step-num">2</div><span>Tap <strong>Add to Home screen</strong> or <strong>Install app</strong></span></div>
+        <div class="install-step"><div class="install-step-num">3</div><span>Tap <strong>Install</strong> — a WFD icon will appear on your home screen</span></div>
+      </div>
+      <div id="install-steps-desktop" class="install-steps" style="display:none">
+        <div class="install-step"><div class="install-step-num">1</div><span>Click the <strong>install icon</strong> <svg class="install-icon-inline" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5 5-5-5M12 3v10"/></svg> in your browser's address bar</span></div>
+        <div class="install-step"><div class="install-step-num">2</div><span>Click <strong>Install</strong> to add it as a desktop app</span></div>
+      </div>
+      <button class="install-btn" id="install-btn-chrome" style="display:none" onclick="triggerInstall()">
+        Install app
+      </button>
+    </div>
 
     <div class="notice">
       <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2zm0 9v2m0 4h.01" stroke="#f9c74f" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
@@ -879,6 +1000,53 @@
   }
 
   updateProgress();
+
+  // Install banner logic
+  let deferredPrompt = null;
+  const banner = document.getElementById('install-banner');
+  const dismissed = localStorage.getItem('wfd-install-dismissed');
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+  if (!isStandalone && !dismissed) {
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /Android/.test(ua);
+    const isChromium = /Chrome/.test(ua) && !/Edg/.test(ua);
+
+    if (isIOS) {
+      document.getElementById('install-steps-ios').style.display = 'flex';
+      banner.classList.add('visible');
+    } else if (isAndroid || (!isIOS && isChromium)) {
+      document.getElementById('install-steps-android').style.display = 'flex';
+      banner.classList.add('visible');
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-steps-android').style.display = 'none';
+      document.getElementById('install-steps-desktop').style.display = 'flex';
+      document.getElementById('install-btn-chrome').style.display = 'block';
+      banner.classList.add('visible');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      banner.classList.remove('visible');
+      localStorage.setItem('wfd-install-dismissed', '1');
+    });
+  }
+
+  function triggerInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    }
+  }
+
+  function dismissInstall() {
+    banner.classList.remove('visible');
+    localStorage.setItem('wfd-install-dismissed', '1');
+  }
 </script>
 </body>
 </html>
