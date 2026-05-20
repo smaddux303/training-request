@@ -1,6 +1,6 @@
 {
-  "name": "WFD Training Request",
-  "short_name": "WFD Training",
+  "name": "WFD Training Requests",
+  "short_name": "Training Req.",
   "description": "Westminster Fire Department Training & Travel Expense Authorization",
   "start_url": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
