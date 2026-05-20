@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1a3a6b">
+  <meta name="description" content="Westminster Fire Department Training & Travel Expense Authorization">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WFD Training">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>WFD Training Request</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #1a3a6b;
+      --brand-dark: #122a50;
+      --brand-light: #e8eef7;
+      --accent: #c0392b;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --border: 1px solid #e2e5ea;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --font: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: var(--brand);
+      color: #fff;
+      padding: 16px 20px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-logo svg { width: 22px; height: 22px; fill: #fff; }
+
+    .header-text h1 { font-size: 15px; font-weight: 600; line-height: 1.2; }
+    .header-text p { font-size: 12px; opacity: 0.7; margin-top: 1px; }
+
+    .progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.2);
+      margin-top: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px 16px 40px;
+    }
+
+    .notice {
+      background: #fff8e1;
+      border: 1px solid #f9c74f;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #7a5c00;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .notice svg { width: 16px; height: 16px; fill: #f9c74f; flex-shrink: 0; margin-top: 1px; }
+
+    .section {
+      background: #fff;
+      border: var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 10px 16px;
+      background: #f7f8fa;
+      border-bottom: var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-header svg { width: 14px; height: 14px; fill: #9ca3af; }
+
+    .section-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+
+    .req { color: var(--accent); margin-left: 2px; }
+
+    .field input[type=text],
+    .field input[type=email],
+    .field input[type=date],
+    .field input[type=number],
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: var(--font);
+      color: #1a1a2e;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(26,58,107,0.1);
+    }
+
+    .field.has-error input,
+    .field.has-error textarea,
+    .field.has-error select {
+      border-color: var(--accent);
+    }
+
+    .field.has-error .error-msg { display: block; }
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .field textarea { min-height: 88px; resize: vertical; }
+
+    .hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+    .radio-grid { display: flex; flex-direction: column; gap: 7px; }
+
+    .radio-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .radio-opt:active { transform: scale(0.99); }
+
+    .radio-opt.selected {
+      border-color: var(--brand);
+      background: var(--brand-light);
+    }
+
+    .radio-opt input[type=radio] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .radio-opt span { font-size: 14px; color: #374151; }
+    .radio-opt.selected span { color: var(--brand); font-weight: 500; }
+
+    .field.has-error .radio-grid-wrap { border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 8px; }
+
+    .upload-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: var(--radius-sm);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--brand);
+      background: var(--brand-light);
+    }
+
+    .upload-icon {
+      width: 40px;
+      height: 40px;
+      background: #f0f2f5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .upload-icon svg { width: 20px; height: 20px; fill: #6b7280; }
+
+    .upload-zone p { font-size: 14px; font-weight: 500; color: #374151; }
+    .upload-zone .sub { font-size: 12px; color: #9ca3af; margin-top: 4px; font-weight: 400; }
+
+    .file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #f7f8fa;
+      border: var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+    }
+
+    .file-item-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--brand-light);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-item-icon svg { width: 16px; height: 16px; fill: var(--brand); }
+    .file-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #374151; }
+    .file-item-size { font-size: 11px; color: #9ca3af; flex-shrink: 0; }
+
+    .file-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+    }
+
+    .file-remove:hover { background: #fee2e2; color: var(--accent); }
+    .file-remove svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .submit-btn:hover { background: var(--brand-dark); }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .submit-btn svg { width: 18px; height: 18px; fill: #fff; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .success-circle {
+      width: 72px;
+      height: 72px;
+      background: #d1fae5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-circle svg { width: 36px; height: 36px; fill: #059669; }
+    .success-screen h2 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+    .success-screen p { font-size: 15px; color: #6b7280; line-height: 1.6; max-width: 320px; margin: 0 auto 24px; }
+
+    .new-request-btn {
+      padding: 12px 28px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (min-width: 600px) {
+      header { padding: 18px 24px 22px; }
+      main { padding: 20px 24px 48px; }
+      .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C9.5 6 7 8 7 12a5 5 0 0010 0c0-4-2.5-6-5-10zm0 14.5a2.5 2.5 0 010-5c1 0 2.5 1 2.5 2.5S13 16.5 12 16.5z"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Westminster Fire Department</h1>
+      <p>Training & Travel Expense Authorization v2.0</p>
+    </div>
+  </div>
+  <div style="max-width:600px; margin:0 auto;">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="form-body">
+
+    <div class="notice">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2zm0 9v2m0 4h.01" stroke="#f9c74f" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <span>Training brochure or registration information <strong>must</strong> be submitted with this form. Fields marked <strong style="color:var(--accent)">*</strong> are required.</span>
+    </div>
+
+    <!-- REQUESTOR INFO -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-5 0-8 2.5-8 4v1h16v-1c0-1.5-3-4-8-4z"/></svg>
+        Requestor information
+      </div>
+      <div class="section-body">
+        <div class="field" id="f-dateSubmitted">
+          <label>Date submitted <span class="req">*</span></label>
+          <input type="date" id="dateSubmitted">
+          <span class="error-msg">Please enter the submission date</span>
+        </div>
+        <div class="field" id="f-name">
+          <label>Full name <span class="req">*</span></label>
+          <input type="text" id="name" placeholder="First and last name" autocomplete="name">
+          <span class="error-msg">Name is required</span>
+        </div>
+        <div class="field" id="f-rankTitle">
+          <label>Rank or title <span class="req">*</span></label>
+          <input type="text" id="rankTitle" placeholder="e.g. Firefighter, Captain, Lieutenant">
+          <span class="error-msg">Rank or title is required</span>
+        </div>
+        <div class="field" id="f-shift">
+          <label>Shift <span class="req">*</span></label>
+          <div class="radio-grid-wrap">
+            <div class="radio-grid">
+              <label class="radio-opt"><input type="radio" name="shift" value="A"><span>A shift</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="B"><span>B shift</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="C"><span>C shift</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="Training"><span>Training</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="EMS Admin"><span>EMS Admin</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="Bureau"><span>Bureau</span></label>
+              <label class="radio-opt"><input type="radio" name="shift" value="Other Admin"><span>Other Admin</span></label>
+            </div>
+          </div>
+          <span class="error-msg">Please select your shift</span>
+        </div>
+        <div class="field" id="f-email">
+          <label>Email address <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="your@westminsterco.gov" autocomplete="email">
+          <span class="error-msg">A valid email address is required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASS DETAILS -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Class details
+      </div>
+      <div class="section-body">
+        <div class="field" id="f-className">
+          <label>Class name <span class="req">*</span></label>
+          <input type="text" id="className" placeholder="Name of the training course">
+          <span class="error-msg">Class name is required</span>
+        </div>
+        <div class="field" id="f-vendorName">
+          <label>Vendor name <span class="req">*</span></label>
+          <input type="text" id="vendorName" placeholder="Training provider or organization">
+          <span class="error-msg">Vendor name is required</span>
+        </div>
+        <div class="field" id="f-classAddress">
+          <label>Class address <span class="req">*</span></label>
+          <input type="text" id="classAddress" placeholder="Street address of training location">
+          <span class="error-msg">Class address is required</span>
+        </div>
+        <div class="field" id="f-classLocation">
+          <label>Class location <span class="req">*</span></label>
+          <div class="radio-grid-wrap">
+            <div class="radio-grid">
+              <label class="radio-opt"><input type="radio" name="classLocation" value="Denver Metro Area"><span>Denver Metro Area</span></label>
+              <label class="radio-opt"><input type="radio" name="classLocation" value="In State/Outside Denver Metro Area"><span>In state / outside Denver Metro</span></label>
+              <label class="radio-opt"><input type="radio" name="classLocation" value="Out of State"><span>Out of state</span></label>
+            </div>
+          </div>
+          <span class="error-msg">Please select a location</span>
+        </div>
+        <div class="date-row">
+          <div class="field" id="f-classStartDate">
+            <label>Class start date <span class="req">*</span></label>
+            <input type="date" id="classStartDate">
+            <span class="error-msg">Required</span>
+          </div>
+          <div class="field" id="f-travelToDate">
+            <label>Travel to class date <span class="req">*</span></label>
+            <input type="date" id="travelToDate">
+            <span class="error-msg">Required</span>
+          </div>
+          <div class="field" id="f-classEndDate">
+            <label>Class end date <span class="req">*</span></label>
+            <input type="date" id="classEndDate">
+            <span class="error-msg">Required</span>
+          </div>
+          <div class="field" id="f-returnDate">
+            <label>Return date <span class="req">*</span></label>
+            <input type="date" id="returnDate">
+            <span class="error-msg">Required</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUSTIFICATION & OVERTIME -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Justification & overtime
+      </div>
+      <div class="section-body">
+        <div class="field" id="f-justification">
+          <label>Purpose and justification statement <span class="req">*</span></label>
+          <textarea id="justification" placeholder="Explain the purpose of this training and how it benefits the department..."></textarea>
+          <span class="error-msg">Justification statement is required</span>
+        </div>
+        <div class="field" id="f-overtime">
+          <label>Overtime <span class="req">*</span></label>
+          <div class="radio-grid-wrap">
+            <div class="radio-grid">
+              <label class="radio-opt"><input type="radio" name="overtime" value="Backfill Requested"><span>Backfill requested</span></label>
+              <label class="radio-opt"><input type="radio" name="overtime" value="Overtime Requested"><span>Overtime requested</span></label>
+              <label class="radio-opt"><input type="radio" name="overtime" value="Overtime and Backfill Requested"><span>Overtime and backfill requested</span></label>
+              <label class="radio-opt"><input type="radio" name="overtime" value="Overtime and Backfill NOT Requested"><span>Overtime and backfill NOT requested</span></label>
+            </div>
+          </div>
+          <span class="error-msg">Please select an overtime option</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRATION -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Registration
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Registration status</label>
+          <div class="radio-grid">
+            <label class="radio-opt"><input type="radio" name="registration" value="Registered"><span>Registered</span></label>
+            <label class="radio-opt"><input type="radio" name="registration" value="Not Registered"><span>Not registered</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Registration fee <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <input type="number" id="registrationFee" placeholder="0.00" min="0" step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSPORTATION -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M5 17H3v-5l2-5h14l2 5v5h-2m-7 0V9M3 12h18" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Transportation
+      </div>
+      <div class="section-body">
+        <div class="field" id="f-transportation">
+          <label>Transportation requested <span class="req">*</span></label>
+          <div class="radio-grid-wrap">
+            <div class="radio-grid">
+              <label class="radio-opt"><input type="radio" name="transportation" value="Fleet Vehicle"><span>Fleet vehicle</span></label>
+              <label class="radio-opt"><input type="radio" name="transportation" value="Mileage Reimbursement"><span>Mileage reimbursement</span></label>
+              <label class="radio-opt"><input type="radio" name="transportation" value="Rental Vehicle"><span>Rental vehicle</span></label>
+              <label class="radio-opt"><input type="radio" name="transportation" value="Ride Share or Taxi"><span>Ride share or taxi</span></label>
+              <label class="radio-opt"><input type="radio" name="transportation" value="Transportation Not Needed"><span>Transportation not needed</span></label>
+            </div>
+          </div>
+          <span class="error-msg">Please select a transportation option</span>
+        </div>
+        <div class="field" id="f-transportCost">
+          <label>Transportation cost <span class="req">*</span></label>
+          <input type="text" id="transportCost" placeholder="Enter dollar amount or N/A">
+          <span class="error-msg">Transportation cost is required</span>
+        </div>
+        <div class="field">
+          <label>Parking cost <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <input type="number" id="parkingCost" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="field hidden" id="mileage-field">
+          <label>Mileage amount <span class="hint" style="font-weight:400">(miles)</span></label>
+          <input type="number" id="mileageAmount" placeholder="Enter miles" min="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- AIRFARE & LODGING -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M21 16l-9-9-9 9M3 16l4-4M17 16l4-4" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Airfare & lodging
+      </div>
+      <div class="section-body">
+        <div class="date-row">
+          <div class="field">
+            <label>Airfare cost <span class="hint" style="font-weight:400">(if applicable)</span></label>
+            <input type="number" id="airfareCost" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="field">
+            <label>Airline <span class="hint" style="font-weight:400">(if applicable)</span></label>
+            <input type="text" id="airline" placeholder="e.g. United, Southwest">
+          </div>
+        </div>
+        <div class="field">
+          <label>Lodging cost <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <input type="number" id="lodgingCost" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Name and address of lodging <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <textarea id="lodgingAddress" placeholder="Hotel name and full address" style="min-height:64px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEALS & OTHER -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Meals & other costs
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Meal cost <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <input type="number" id="mealCost" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Other costs <span class="hint" style="font-weight:400">(if applicable)</span></label>
+          <textarea id="otherCosts" placeholder="Describe and enter dollar amount" style="min-height:64px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="section">
+      <div class="section-header">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Supporting documents
+      </div>
+      <div class="section-body">
+        <div class="notice" style="margin-bottom:0">
+          <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2zm0 9v2m0 4h.01" stroke="#f9c74f" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <span>Upload your training brochure/registration info. If requesting mileage reimbursement or you've already paid any portion, also include your reimbursement form and/or receipts.</span>
+        </div>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <p>Tap to upload files</p>
+          <p class="sub">PDF, JPG, PNG · Up to 10 MB each</p>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+        <div class="file-list" id="file-list"></div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      Submit request
+    </button>
+
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-circle">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="#059669" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2>Request submitted!</h2>
+    <p>Your training request has been received. You'll get a confirmation email shortly, and your training chief will follow up with an approval decision.</p>
+    <button class="new-request-btn" onclick="resetForm()">Submit another request</button>
+  </div>
+</main>
+
+<script>
+  const uploadedFiles = [];
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  document.getElementById('dateSubmitted').value = new Date().toISOString().split('T')[0];
+
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    Array.from(e.target.files).forEach(addFile);
+    this.value = '';
+  });
+
+  function addFile(file) {
+    if (!uploadedFiles.find(f => f.name === file.name && f.size === file.size)) {
+      uploadedFiles.push(file);
+      renderFiles();
+    }
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('upload-zone').classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('drag-over');
+    Array.from(e.dataTransfer.files).forEach(addFile);
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function renderFiles() {
+    const list = document.getElementById('file-list');
+    list.innerHTML = '';
+    uploadedFiles.forEach((file, i) => {
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.innerHTML = `
+        <div class="file-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="#1a3a6b" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </div>
+        <span class="file-item-name">${file.name}</span>
+        <span class="file-item-size">${formatSize(file.size)}</span>
+        <button class="file-remove" onclick="removeFile(${i})" aria-label="Remove ${file.name}">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>`;
+      list.appendChild(div);
+    });
+  }
+
+  function removeFile(i) {
+    uploadedFiles.splice(i, 1);
+    renderFiles();
+  }
+
+  document.querySelectorAll('.radio-opt input').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll(`.radio-opt input[name="${this.name}"]`).forEach(r => {
+        r.closest('.radio-opt').classList.toggle('selected', r === this);
+      });
+      if (this.name === 'transportation') {
+        document.getElementById('mileage-field').classList.toggle('hidden', this.value !== 'Mileage Reimbursement');
+      }
+      updateProgress();
+    });
+  });
+
+  const textFields = ['dateSubmitted','name','rankTitle','email','className','vendorName','classAddress','classStartDate','travelToDate','classEndDate','returnDate','justification','transportCost'];
+  textFields.forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateProgress);
+  });
+
+  function updateProgress() {
+    const radioReq = ['shift','classLocation','overtime','transportation'];
+    let filled = 0;
+    const total = textFields.length + radioReq.length;
+    textFields.forEach(id => { if (document.getElementById(id)?.value?.trim()) filled++; });
+    radioReq.forEach(name => { if (document.querySelector(`input[name="${name}"]:checked`)) filled++; });
+    document.getElementById('progress').style.width = Math.round((filled / total) * 100) + '%';
+  }
+
+  function setError(fieldId, show) {
+    const el = document.getElementById(fieldId);
+    if (el) el.classList.toggle('has-error', show);
+  }
+
+  function validate() {
+    let valid = true;
+    const reqText = ['dateSubmitted','name','rankTitle','email','className','vendorName','classAddress','classStartDate','travelToDate','classEndDate','returnDate','justification','transportCost'];
+    reqText.forEach(id => {
+      const val = document.getElementById(id)?.value?.trim();
+      const hasErr = !val;
+      setError('f-' + id, hasErr);
+      if (hasErr) valid = false;
+    });
+    const emailVal = document.getElementById('email')?.value;
+    if (emailVal && !/\S+@\S+\.\S+/.test(emailVal)) {
+      setError('f-email', true);
+      valid = false;
+    }
+    ['shift','classLocation','overtime','transportation'].forEach(name => {
+      const checked = !!document.querySelector(`input[name="${name}"]:checked`);
+      const map = {shift:'f-shift', classLocation:'f-classLocation', overtime:'f-overtime', transportation:'f-transportation'};
+      setError(map[name], !checked);
+      if (!checked) valid = false;
+    });
+    return valid;
+  }
+
+  function getRadio(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+  }
+
+  function val(id) { return document.getElementById(id)?.value?.trim() || 'N/A'; }
+
+  async function submitForm() {
+    if (!validate()) {
+      document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Submitting...';
+
+    let fileData = [];
+    try {
+      fileData = await Promise.all(uploadedFiles.map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ name: file.name, type: file.type, size: file.size, data: reader.result.split(',')[1] });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      })));
+    } catch (e) {
+      alert('Error reading files. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg> Submit request';
+      return;
+    }
+
+    const payload = {
+      dateSubmitted: document.getElementById('dateSubmitted').value,
+      name: document.getElementById('name').value,
+      rankTitle: document.getElementById('rankTitle').value,
+      shift: getRadio('shift'),
+      email: document.getElementById('email').value,
+      className: document.getElementById('className').value,
+      vendorName: document.getElementById('vendorName').value,
+      classAddress: document.getElementById('classAddress').value,
+      classLocation: getRadio('classLocation'),
+      classStartDate: document.getElementById('classStartDate').value,
+      travelToDate: document.getElementById('travelToDate').value,
+      classEndDate: document.getElementById('classEndDate').value,
+      returnDate: document.getElementById('returnDate').value,
+      justification: document.getElementById('justification').value,
+      overtime: getRadio('overtime'),
+      registration: getRadio('registration') || 'Not specified',
+      registrationFee: val('registrationFee'),
+      transportation: getRadio('transportation'),
+      transportationCost: document.getElementById('transportCost').value,
+      parkingCost: val('parkingCost'),
+      mileageAmount: val('mileageAmount'),
+      airfareCost: val('airfareCost'),
+      airline: val('airline'),
+      lodgingCost: val('lodgingCost'),
+      lodgingAddress: val('lodgingAddress'),
+      mealCost: val('mealCost'),
+      otherCosts: val('otherCosts'),
+      attachments: fileData
+    };
+
+    try {
+      const POWER_AUTOMATE_URL = 'YOUR_POWER_AUTOMATE_HTTP_TRIGGER_URL_HERE';
+      const response = await fetch(POWER_AUTOMATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error('Server error');
+      document.getElementById('form-body').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      alert('Submission failed. Please check your connection and try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg> Submit request';
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('success-screen').style.display = 'none';
+    document.getElementById('form-body').style.display = 'block';
+    document.querySelector('main').parentElement.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
